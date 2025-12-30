@@ -4,19 +4,19 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 
 const Admin = () => {
-  const { isAuthenticated, isAdmin, user, logout, getAuthHeader, loading: authLoading } = useAuth();
+  const { isAuthenticated, isVerified, user, logout, getAuthHeader, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    document.title = 'Admin Panel - MovieBuzz';
+    document.title = 'Upload Movie - MovieBuzz';
   }, []);
 
-  // Redirect if not authenticated
+  // Redirect if not authenticated or not verified
   useEffect(() => {
-    if (!authLoading && (!isAuthenticated || !isAdmin)) {
+    if (!authLoading && (!isAuthenticated || !isVerified)) {
       navigate('/login');
     }
-  }, [isAuthenticated, isAdmin, authLoading, navigate]);
+  }, [isAuthenticated, isVerified, authLoading, navigate]);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -128,7 +128,7 @@ const Admin = () => {
         }
       });
 
-      setMessage({ type: 'success', text: 'Movie added successfully!' });
+      setMessage({ type: 'success', text: '🎉 Movie added successfully!' });
       
       // Reset form
       setFormData({
@@ -170,7 +170,7 @@ const Admin = () => {
     );
   }
 
-  if (!isAuthenticated || !isAdmin) {
+  if (!isAuthenticated || !isVerified) {
     return null; // Will redirect via useEffect
   }
 
@@ -178,10 +178,10 @@ const Admin = () => {
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="mb-8 flex justify-between items-start">
         <div>
-          <h1 className="text-4xl font-bold text-white mb-2">Admin Panel</h1>
+          <h1 className="text-4xl font-bold text-white mb-2">📤 Upload Movie</h1>
           <p className="text-gray-400">Add a new movie to the gallery</p>
           <p className="text-sm text-green-400 mt-1">
-            👤 Logged in as: <span className="font-semibold">{user?.username}</span>
+            ✅ Verified: <span className="font-semibold">{user?.username}</span>
           </p>
         </div>
         <button
@@ -344,7 +344,7 @@ const Admin = () => {
             disabled={loading}
             className="w-full bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-semibold px-8 py-4 rounded-lg transition duration-200 transform hover:scale-105 disabled:transform-none"
           >
-            {loading ? 'Adding Movie...' : 'Add Movie'}
+            {loading ? 'Adding Movie...' : '🎬 Add Movie'}
           </button>
         </div>
       </form>

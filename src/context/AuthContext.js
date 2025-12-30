@@ -13,21 +13,8 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('adminToken'));
+  const [token, setToken] = useState(localStorage.getItem('userToken'));
   const [loading, setLoading] = useState(true);
-  const [setupRequired, setSetupRequired] = useState(false);
-
-  // Check if setup is needed (no admins exist)
-  const checkSetupStatus = async () => {
-    try {
-      const response = await axios.get('/api/auth/setup-status');
-      setSetupRequired(response.data.setupRequired);
-      return response.data.setupRequired;
-    } catch (error) {
-      console.error('Setup status check failed:', error);
-      return false;
-    }
-  };
 
   // Verify token on mount
   useEffect(() => {
@@ -40,17 +27,70 @@ export const AuthProvider = ({ children }) => {
           setUser(response.data.user);
         } catch (error) {
           // Token invalid, clear it
-          localStorage.removeItem('adminToken');
+          localStorage.removeItem('userToken');
           setToken(null);
           setUser(null);
         }
       }
-      await checkSetupStatus();
       setLoading(false);
     };
 
     verifyToken();
   }, [token]);
+
+  // Register function
+  const register = async (username, password, mobile) => {
+    try {
+      const response = await axios.post('/api/auth/register', { username, password, mobile });
+      return { 
+        success: true, 
+        message: response.data.message,
+        userId: response.data.userId,
+        debugOtp: response.data.debugOtp // Only for testing
+      };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: error.response?.data?.error || 'Registration failed. Please try again.' 
+      };
+    }
+  };
+
+  // Send OTP function
+  const sendOtp = async (mobile) => {
+    try {
+      const response = await axios.post('/api/auth/send-otp', { mobile });
+      return { 
+        success: true, 
+        message: response.data.message,
+        debugOtp: response.data.debugOtp // Only for testing
+      };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: error.response?.data?.error || 'Failed to send OTP.' 
+      };
+    }
+  };
+
+  // Verify OTP function
+  const verifyOtp = async (mobile, otp) => {
+    try {
+      const response = await axios.post('/api/auth/verify-otp', { mobile, otp });
+      const { token: newToken, user: userData } = response.data;
+      
+      localStorage.setItem('userToken', newToken);
+      setToken(newToken);
+      setUser(userData);
+      
+      return { success: true, message: response.data.message };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: error.response?.data?.error || 'OTP verification failed.' 
+      };
+    }
+  };
 
   // Login function
   const login = async (username, password) => {
@@ -58,42 +98,25 @@ export const AuthProvider = ({ children }) => {
       const response = await axios.post('/api/auth/login', { username, password });
       const { token: newToken, user: userData } = response.data;
       
-      localStorage.setItem('adminToken', newToken);
+      localStorage.setItem('userToken', newToken);
       setToken(newToken);
       setUser(userData);
       
       return { success: true };
     } catch (error) {
+      const errorData = error.response?.data;
       return { 
         success: false, 
-        error: error.response?.data?.error || 'Login failed. Please try again.' 
-      };
-    }
-  };
-
-  // Setup first admin
-  const setupAdmin = async (username, password) => {
-    try {
-      const response = await axios.post('/api/auth/setup', { username, password });
-      const { token: newToken, user: userData } = response.data;
-      
-      localStorage.setItem('adminToken', newToken);
-      setToken(newToken);
-      setUser(userData);
-      setSetupRequired(false);
-      
-      return { success: true };
-    } catch (error) {
-      return { 
-        success: false, 
-        error: error.response?.data?.error || 'Setup failed. Please try again.' 
+        error: errorData?.error || 'Login failed. Please try again.',
+        needsVerification: errorData?.needsVerification,
+        mobile: errorData?.mobile
       };
     }
   };
 
   // Logout function
   const logout = () => {
-    localStorage.removeItem('adminToken');
+    localStorage.removeItem('userToken');
     setToken(null);
     setUser(null);
   };
@@ -107,14 +130,14 @@ export const AuthProvider = ({ children }) => {
     user,
     token,
     loading,
-    setupRequired,
     isAuthenticated: !!user && !!token,
-    isAdmin: user?.isAdmin || false,
+    isVerified: user?.isVerified || false,
+    register,
+    sendOtp,
+    verifyOtp,
     login,
     logout,
-    setupAdmin,
-    getAuthHeader,
-    checkSetupStatus
+    getAuthHeader
   };
 
   return (
@@ -125,4 +148,3 @@ export const AuthProvider = ({ children }) => {
 };
 
 export default AuthContext;
-

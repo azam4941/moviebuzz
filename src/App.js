@@ -7,6 +7,8 @@ import Home from './pages/Home';
 import MovieDetail from './pages/MovieDetail';
 import Admin from './pages/Admin';
 import Login from './pages/Login';
+import Register from './pages/Register';
+import VerifyOtp from './pages/VerifyOtp';
 
 function App() {
   return (
@@ -20,6 +22,8 @@ function App() {
               <Route path="/movie/:id" element={<MovieDetail />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/verify-otp" element={<VerifyOtp />} />
             </Routes>
           </main>
           <Footer />
