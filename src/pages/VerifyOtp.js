@@ -125,19 +125,15 @@ const VerifyOtp = () => {
     const result = await sendOtp(email);
     
     if (result.success) {
-      setSuccess(result.demoMode ? 'New OTP generated!' : 'OTP sent to your email!');
+      setSuccess('New verification code generated!');
       setResendTimer(60);
       setCanResend(false);
       setOtp(['', '', '', '', '', '']);
       inputRefs.current[0]?.focus();
       
-      // Update displayed OTP if in demo mode
+      // Update displayed OTP
       if (result.otp) {
         setDisplayOtp(result.otp);
-        setIsDemoMode(true);
-      } else {
-        setDisplayOtp('');
-        setIsDemoMode(false);
       }
       
       setTimeout(() => setSuccess(''), 3000);
@@ -160,14 +156,11 @@ const VerifyOtp = () => {
     <div className="min-h-screen flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">📧 Verify Email</h1>
+          <h1 className="text-4xl font-bold text-white mb-2">🔒 Verify Your Account</h1>
           <p className="text-gray-400">
-            {isDemoMode 
-              ? 'Enter the 6-digit verification code shown below'
-              : 'Enter the 6-digit code sent to your email'
-            }
+            Enter the 6-digit verification code to continue
           </p>
-          <p className="text-red-500 font-semibold text-lg mt-1">{email}</p>
+          <p className="text-red-500 font-semibold text-lg mt-2">{email}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-dark-card rounded-lg p-8 shadow-xl">
@@ -183,21 +176,22 @@ const VerifyOtp = () => {
             </div>
           )}
 
-          {/* OTP Display - Demo Mode */}
-          {displayOtp && isDemoMode && (
-            <div className="mb-6 p-4 rounded-lg bg-gradient-to-r from-blue-900/50 to-purple-900/50 text-blue-300 border border-blue-700 text-center">
-              <p className="text-sm text-blue-400 mb-2">🔐 Your Verification Code:</p>
-              <p className="text-3xl font-mono font-bold tracking-[0.5em] text-white">{displayOtp}</p>
-              <p className="text-xs text-gray-400 mt-2">(Demo mode - email service not configured)</p>
+          {/* OTP Display - Self-contained OTP System */}
+          {displayOtp && (
+            <div className="mb-6 p-5 rounded-xl bg-gradient-to-br from-emerald-900/60 to-teal-900/60 border-2 border-emerald-500/50 text-center shadow-lg shadow-emerald-500/20">
+              <p className="text-sm text-emerald-400 mb-3 font-medium">🔐 Your Verification Code</p>
+              <div className="bg-black/40 rounded-lg py-4 px-6 inline-block">
+                <p className="text-4xl font-mono font-bold tracking-[0.6em] text-white drop-shadow-lg">{displayOtp}</p>
+              </div>
+              <p className="text-xs text-emerald-300/70 mt-3">Enter this code in the boxes below</p>
             </div>
           )}
 
-          {/* Email sent message - Real Mode */}
-          {!isDemoMode && !displayOtp && (
-            <div className="mb-6 p-4 rounded-lg bg-gradient-to-r from-green-900/50 to-emerald-900/50 text-green-300 border border-green-700 text-center">
-              <p className="text-sm text-green-400 mb-2">📬 Check Your Email!</p>
-              <p className="text-sm text-gray-300">We've sent a 6-digit verification code to your email address.</p>
-              <p className="text-xs text-gray-400 mt-2">Don't forget to check your spam folder!</p>
+          {/* Loading state when OTP not yet received */}
+          {!displayOtp && (
+            <div className="mb-6 p-4 rounded-lg bg-gradient-to-r from-blue-900/50 to-indigo-900/50 text-blue-300 border border-blue-700 text-center">
+              <p className="text-sm text-blue-400 mb-2">⏳ Generating OTP...</p>
+              <p className="text-sm text-gray-300">Please wait while we generate your verification code.</p>
             </div>
           )}
 
@@ -258,10 +252,7 @@ const VerifyOtp = () => {
         </form>
 
         <p className="text-center text-gray-500 mt-6 text-sm">
-          {isDemoMode 
-            ? 'Copy the code above and enter it in the boxes.'
-            : 'Check your email inbox for the verification code.'
-          }
+          Enter the 6-digit code shown above to verify your account.
         </p>
       </div>
     </div>
