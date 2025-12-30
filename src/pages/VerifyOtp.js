@@ -9,6 +9,7 @@ const VerifyOtp = () => {
   const [loading, setLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(60);
   const [canResend, setCanResend] = useState(false);
+  const [displayOtp, setDisplayOtp] = useState('');
   
   const inputRefs = useRef([]);
   const { verifyOtp, sendOtp, isAuthenticated, isVerified, loading: authLoading } = useAuth();
@@ -16,11 +17,15 @@ const VerifyOtp = () => {
   const location = useLocation();
   
   const mobile = location.state?.mobile;
-  const debugOtp = location.state?.debugOtp;
+  const initialOtp = location.state?.otp;
 
   useEffect(() => {
     document.title = 'Verify Mobile - MovieBuzz';
-  }, []);
+    // Set the initial OTP from registration
+    if (initialOtp) {
+      setDisplayOtp(initialOtp);
+    }
+  }, [initialOtp]);
 
   // Redirect if no mobile or already verified
   useEffect(() => {
@@ -114,15 +119,15 @@ const VerifyOtp = () => {
     const result = await sendOtp(mobile);
     
     if (result.success) {
-      setSuccess('OTP resent successfully!');
+      setSuccess('New OTP generated!');
       setResendTimer(60);
       setCanResend(false);
       setOtp(['', '', '', '', '', '']);
       inputRefs.current[0]?.focus();
       
-      // Show debug OTP if available
-      if (result.debugOtp) {
-        console.log('Debug OTP:', result.debugOtp);
+      // Update displayed OTP
+      if (result.otp) {
+        setDisplayOtp(result.otp);
       }
       
       setTimeout(() => setSuccess(''), 3000);
@@ -147,7 +152,7 @@ const VerifyOtp = () => {
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">📱 Verify Mobile</h1>
           <p className="text-gray-400">
-            Enter the 6-digit code sent to
+            Enter the 6-digit verification code
           </p>
           <p className="text-red-500 font-semibold text-lg mt-1">+91 {mobile}</p>
         </div>
@@ -165,11 +170,12 @@ const VerifyOtp = () => {
             </div>
           )}
 
-          {/* Debug OTP display for testing - remove in production */}
-          {debugOtp && (
-            <div className="mb-6 p-4 rounded-lg bg-blue-900/50 text-blue-300 border border-blue-700 text-center">
-              <p className="text-sm text-blue-400 mb-1">Test OTP (for demo):</p>
-              <p className="text-2xl font-mono font-bold tracking-widest">{debugOtp}</p>
+          {/* OTP Display - Demo Mode */}
+          {displayOtp && (
+            <div className="mb-6 p-4 rounded-lg bg-gradient-to-r from-blue-900/50 to-purple-900/50 text-blue-300 border border-blue-700 text-center">
+              <p className="text-sm text-blue-400 mb-2">🔐 Your Verification Code:</p>
+              <p className="text-3xl font-mono font-bold tracking-[0.5em] text-white">{displayOtp}</p>
+              <p className="text-xs text-gray-400 mt-2">(Demo mode - no SMS service)</p>
             </div>
           )}
 
@@ -204,7 +210,7 @@ const VerifyOtp = () => {
 
           <div className="mt-6 text-center">
             <p className="text-gray-400 text-sm">
-              Didn't receive the code?{' '}
+              Need a new code?{' '}
               {canResend ? (
                 <button
                   type="button"
@@ -212,11 +218,11 @@ const VerifyOtp = () => {
                   disabled={loading}
                   className="text-red-500 hover:text-red-400 font-semibold"
                 >
-                  Resend OTP
+                  Generate New OTP
                 </button>
               ) : (
                 <span className="text-gray-500">
-                  Resend in {resendTimer}s
+                  Wait {resendTimer}s
                 </span>
               )}
             </p>
@@ -230,7 +236,7 @@ const VerifyOtp = () => {
         </form>
 
         <p className="text-center text-gray-500 mt-6 text-sm">
-          Make sure to check your SMS inbox for the verification code.
+          Copy the code above and enter it in the boxes.
         </p>
       </div>
     </div>
@@ -238,4 +244,3 @@ const VerifyOtp = () => {
 };
 
 export default VerifyOtp;
-

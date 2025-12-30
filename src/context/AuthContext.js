@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }) => {
         success: true, 
         message: response.data.message,
         userId: response.data.userId,
-        debugOtp: response.data.debugOtp // Only for testing
+        otp: response.data.otp // OTP for display (demo mode)
       };
     } catch (error) {
       return { 
@@ -63,7 +63,7 @@ export const AuthProvider = ({ children }) => {
       return { 
         success: true, 
         message: response.data.message,
-        debugOtp: response.data.debugOtp // Only for testing
+        otp: response.data.otp // OTP for display (demo mode)
       };
     } catch (error) {
       return { 
