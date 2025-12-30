@@ -1,10 +1,23 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
 
 const Admin = () => {
+  const { isAuthenticated, isAdmin, user, logout, getAuthHeader, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
+
   useEffect(() => {
     document.title = 'Admin Panel - MovieBuzz';
   }, []);
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!authLoading && (!isAuthenticated || !isAdmin)) {
+      navigate('/login');
+    }
+  }, [isAuthenticated, isAdmin, authLoading, navigate]);
+
   const [formData, setFormData] = useState({
     title: '',
     year: '',
@@ -50,6 +63,11 @@ const Admin = () => {
     } catch (_) {
       return false;
     }
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
   };
 
   const handleSubmit = async (e) => {
@@ -105,7 +123,8 @@ const Admin = () => {
 
       const response = await axios.post('/api/movies', data, {
         headers: {
-          'Content-Type': 'multipart/form-data'
+          'Content-Type': 'multipart/form-data',
+          ...getAuthHeader()
         }
       });
 
@@ -126,20 +145,51 @@ const Admin = () => {
       document.getElementById('banner-input').value = '';
       document.getElementById('gallery-input').value = '';
     } catch (error) {
-      setMessage({ 
-        type: 'error', 
-        text: error.response?.data?.error || 'Failed to add movie. Please try again.' 
-      });
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        setMessage({ type: 'error', text: 'Session expired. Please login again.' });
+        setTimeout(() => {
+          logout();
+          navigate('/login');
+        }, 2000);
+      } else {
+        setMessage({ 
+          type: 'error', 
+          text: error.response?.data?.error || 'Failed to add movie. Please try again.' 
+        });
+      }
     } finally {
       setLoading(false);
     }
   };
 
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated || !isAdmin) {
+    return null; // Will redirect via useEffect
+  }
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-white mb-2">Admin Panel</h1>
-        <p className="text-gray-400">Add a new movie to the gallery</p>
+      <div className="mb-8 flex justify-between items-start">
+        <div>
+          <h1 className="text-4xl font-bold text-white mb-2">Admin Panel</h1>
+          <p className="text-gray-400">Add a new movie to the gallery</p>
+          <p className="text-sm text-green-400 mt-1">
+            👤 Logged in as: <span className="font-semibold">{user?.username}</span>
+          </p>
+        </div>
+        <button
+          onClick={handleLogout}
+          className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition flex items-center gap-2"
+        >
+          <span>🚪</span> Logout
+        </button>
       </div>
 
       <form onSubmit={handleSubmit} className="bg-dark-card rounded-lg p-6 md:p-8">
@@ -303,4 +353,3 @@ const Admin = () => {
 };
 
 export default Admin;
-
