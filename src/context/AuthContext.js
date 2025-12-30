@@ -50,7 +50,8 @@ export const AuthProvider = ({ children }) => {
         success: true, 
         message: response.data.message,
         userId: response.data.userId,
-        otp: response.data.otp // OTP for display (demo mode)
+        otp: response.data.otp, // OTP for display (demo mode only)
+        demoMode: response.data.demoMode || false
       };
     } catch (error) {
       return { 
@@ -67,7 +68,8 @@ export const AuthProvider = ({ children }) => {
       return { 
         success: true, 
         message: response.data.message,
-        otp: response.data.otp // OTP for display (demo mode)
+        otp: response.data.otp, // OTP for display (demo mode only)
+        demoMode: response.data.demoMode || false
       };
     } catch (error) {
       return { 

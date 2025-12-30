@@ -10,6 +10,7 @@ const VerifyOtp = () => {
   const [resendTimer, setResendTimer] = useState(60);
   const [canResend, setCanResend] = useState(false);
   const [displayOtp, setDisplayOtp] = useState('');
+  const [isDemoMode, setIsDemoMode] = useState(false);
   
   const inputRefs = useRef([]);
   const { verifyOtp, sendOtp, isAuthenticated, isVerified, loading: authLoading } = useAuth();
@@ -18,14 +19,19 @@ const VerifyOtp = () => {
   
   const email = location.state?.email;
   const initialOtp = location.state?.otp;
+  const demoMode = location.state?.demoMode;
 
   useEffect(() => {
     document.title = 'Verify Email - MovieBuzz';
-    // Set the initial OTP from registration
+    // Set the initial OTP from registration (only in demo mode)
     if (initialOtp) {
       setDisplayOtp(initialOtp);
+      setIsDemoMode(true);
     }
-  }, [initialOtp]);
+    if (demoMode) {
+      setIsDemoMode(true);
+    }
+  }, [initialOtp, demoMode]);
 
   // Redirect if no email or already verified
   useEffect(() => {
@@ -119,15 +125,19 @@ const VerifyOtp = () => {
     const result = await sendOtp(email);
     
     if (result.success) {
-      setSuccess('New OTP generated!');
+      setSuccess(result.demoMode ? 'New OTP generated!' : 'OTP sent to your email!');
       setResendTimer(60);
       setCanResend(false);
       setOtp(['', '', '', '', '', '']);
       inputRefs.current[0]?.focus();
       
-      // Update displayed OTP
+      // Update displayed OTP if in demo mode
       if (result.otp) {
         setDisplayOtp(result.otp);
+        setIsDemoMode(true);
+      } else {
+        setDisplayOtp('');
+        setIsDemoMode(false);
       }
       
       setTimeout(() => setSuccess(''), 3000);
@@ -152,7 +162,10 @@ const VerifyOtp = () => {
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">📧 Verify Email</h1>
           <p className="text-gray-400">
-            Enter the 6-digit verification code
+            {isDemoMode 
+              ? 'Enter the 6-digit verification code shown below'
+              : 'Enter the 6-digit code sent to your email'
+            }
           </p>
           <p className="text-red-500 font-semibold text-lg mt-1">{email}</p>
         </div>
@@ -171,11 +184,20 @@ const VerifyOtp = () => {
           )}
 
           {/* OTP Display - Demo Mode */}
-          {displayOtp && (
+          {displayOtp && isDemoMode && (
             <div className="mb-6 p-4 rounded-lg bg-gradient-to-r from-blue-900/50 to-purple-900/50 text-blue-300 border border-blue-700 text-center">
               <p className="text-sm text-blue-400 mb-2">🔐 Your Verification Code:</p>
               <p className="text-3xl font-mono font-bold tracking-[0.5em] text-white">{displayOtp}</p>
-              <p className="text-xs text-gray-400 mt-2">(Demo mode - no email service)</p>
+              <p className="text-xs text-gray-400 mt-2">(Demo mode - email service not configured)</p>
+            </div>
+          )}
+
+          {/* Email sent message - Real Mode */}
+          {!isDemoMode && !displayOtp && (
+            <div className="mb-6 p-4 rounded-lg bg-gradient-to-r from-green-900/50 to-emerald-900/50 text-green-300 border border-green-700 text-center">
+              <p className="text-sm text-green-400 mb-2">📬 Check Your Email!</p>
+              <p className="text-sm text-gray-300">We've sent a 6-digit verification code to your email address.</p>
+              <p className="text-xs text-gray-400 mt-2">Don't forget to check your spam folder!</p>
             </div>
           )}
 
@@ -210,7 +232,7 @@ const VerifyOtp = () => {
 
           <div className="mt-6 text-center">
             <p className="text-gray-400 text-sm">
-              Need a new code?{' '}
+              Didn't receive the code?{' '}
               {canResend ? (
                 <button
                   type="button"
@@ -218,7 +240,7 @@ const VerifyOtp = () => {
                   disabled={loading}
                   className="text-red-500 hover:text-red-400 font-semibold"
                 >
-                  Generate New OTP
+                  Resend OTP
                 </button>
               ) : (
                 <span className="text-gray-500">
@@ -236,7 +258,10 @@ const VerifyOtp = () => {
         </form>
 
         <p className="text-center text-gray-500 mt-6 text-sm">
-          Copy the code above and enter it in the boxes.
+          {isDemoMode 
+            ? 'Copy the code above and enter it in the boxes.'
+            : 'Check your email inbox for the verification code.'
+          }
         </p>
       </div>
     </div>

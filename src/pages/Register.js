@@ -65,8 +65,14 @@ const Register = () => {
     const result = await register(username, password, email);
     
     if (result.success) {
-      // Navigate to OTP verification with email and OTP
-      navigate('/verify-otp', { state: { email, otp: result.otp } });
+      // Navigate to OTP verification with email and OTP (if demo mode)
+      navigate('/verify-otp', { 
+        state: { 
+          email, 
+          otp: result.otp,
+          demoMode: result.demoMode 
+        } 
+      });
     } else {
       setError(result.error);
     }
