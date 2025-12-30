@@ -16,21 +16,21 @@ const VerifyOtp = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  const mobile = location.state?.mobile;
+  const email = location.state?.email;
   const initialOtp = location.state?.otp;
 
   useEffect(() => {
-    document.title = 'Verify Mobile - MovieBuzz';
+    document.title = 'Verify Email - MovieBuzz';
     // Set the initial OTP from registration
     if (initialOtp) {
       setDisplayOtp(initialOtp);
     }
   }, [initialOtp]);
 
-  // Redirect if no mobile or already verified
+  // Redirect if no email or already verified
   useEffect(() => {
     if (!authLoading) {
-      if (!mobile) {
+      if (!email) {
         navigate('/register');
         return;
       }
@@ -38,7 +38,7 @@ const VerifyOtp = () => {
         navigate('/admin');
       }
     }
-  }, [mobile, isAuthenticated, isVerified, authLoading, navigate]);
+  }, [email, isAuthenticated, isVerified, authLoading, navigate]);
 
   // Resend timer countdown
   useEffect(() => {
@@ -98,10 +98,10 @@ const VerifyOtp = () => {
       return;
     }
 
-    const result = await verifyOtp(mobile, otpString);
+    const result = await verifyOtp(email, otpString);
     
     if (result.success) {
-      setSuccess('Mobile verified successfully! Redirecting...');
+      setSuccess('Email verified successfully! Redirecting...');
       setTimeout(() => navigate('/admin'), 1500);
     } else {
       setError(result.error);
@@ -116,7 +116,7 @@ const VerifyOtp = () => {
     setLoading(true);
     setError('');
     
-    const result = await sendOtp(mobile);
+    const result = await sendOtp(email);
     
     if (result.success) {
       setSuccess('New OTP generated!');
@@ -150,11 +150,11 @@ const VerifyOtp = () => {
     <div className="min-h-screen flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">📱 Verify Mobile</h1>
+          <h1 className="text-4xl font-bold text-white mb-2">📧 Verify Email</h1>
           <p className="text-gray-400">
             Enter the 6-digit verification code
           </p>
-          <p className="text-red-500 font-semibold text-lg mt-1">+91 {mobile}</p>
+          <p className="text-red-500 font-semibold text-lg mt-1">{email}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-dark-card rounded-lg p-8 shadow-xl">
@@ -175,7 +175,7 @@ const VerifyOtp = () => {
             <div className="mb-6 p-4 rounded-lg bg-gradient-to-r from-blue-900/50 to-purple-900/50 text-blue-300 border border-blue-700 text-center">
               <p className="text-sm text-blue-400 mb-2">🔐 Your Verification Code:</p>
               <p className="text-3xl font-mono font-bold tracking-[0.5em] text-white">{displayOtp}</p>
-              <p className="text-xs text-gray-400 mt-2">(Demo mode - no SMS service)</p>
+              <p className="text-xs text-gray-400 mt-2">(Demo mode - no email service)</p>
             </div>
           )}
 

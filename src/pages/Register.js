@@ -6,7 +6,7 @@ const Register = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [mobile, setMobile] = useState('');
+  const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   
@@ -30,7 +30,7 @@ const Register = () => {
     setLoading(true);
 
     // Validation
-    if (!username.trim() || !password.trim() || !mobile.trim()) {
+    if (!username.trim() || !password.trim() || !email.trim()) {
       setError('Please fill in all fields');
       setLoading(false);
       return;
@@ -54,19 +54,19 @@ const Register = () => {
       return;
     }
 
-    // Validate mobile (10 digits)
-    const mobileRegex = /^[0-9]{10}$/;
-    if (!mobileRegex.test(mobile)) {
-      setError('Please enter a valid 10-digit mobile number');
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError('Please enter a valid email address');
       setLoading(false);
       return;
     }
 
-    const result = await register(username, password, mobile);
+    const result = await register(username, password, email);
     
     if (result.success) {
-      // Navigate to OTP verification with mobile number and OTP
-      navigate('/verify-otp', { state: { mobile, otp: result.otp } });
+      // Navigate to OTP verification with email and OTP
+      navigate('/verify-otp', { state: { email, otp: result.otp } });
     } else {
       setError(result.error);
     }
@@ -117,23 +117,18 @@ const Register = () => {
 
             <div>
               <label className="block text-white font-semibold mb-2">
-                Mobile Number
+                Email Address
               </label>
-              <div className="flex">
-                <span className="px-4 py-3 bg-gray-700 border border-r-0 border-gray-700 rounded-l-lg text-gray-400">
-                  +91
-                </span>
-                <input
-                  type="tel"
-                  value={mobile}
-                  onChange={(e) => setMobile(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                  className="w-full px-4 py-3 bg-dark-hover border border-gray-700 rounded-r-lg text-white focus:outline-none focus:border-red-600 transition"
-                  placeholder="10-digit mobile number"
-                  autoComplete="tel"
-                  disabled={loading}
-                />
-              </div>
-              <p className="text-xs text-gray-500 mt-1">We'll send a verification code to this number</p>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 py-3 bg-dark-hover border border-gray-700 rounded-lg text-white focus:outline-none focus:border-red-600 transition"
+                placeholder="Enter your email"
+                autoComplete="email"
+                disabled={loading}
+              />
+              <p className="text-xs text-gray-500 mt-1">We'll send a verification code to this email</p>
             </div>
 
             <div>
@@ -171,7 +166,7 @@ const Register = () => {
               disabled={loading}
               className="w-full bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-semibold px-8 py-4 rounded-lg transition duration-200 transform hover:scale-105 disabled:transform-none"
             >
-              {loading ? 'Creating Account...' : 'Register & Verify Mobile'}
+              {loading ? 'Creating Account...' : 'Register & Verify Email'}
             </button>
           </div>
 
@@ -192,4 +187,3 @@ const Register = () => {
 };
 
 export default Register;
-

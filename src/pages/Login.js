@@ -38,8 +38,8 @@ const Login = () => {
     if (result.success) {
       navigate('/admin');
     } else if (result.needsVerification) {
-      // User needs to verify mobile first
-      navigate('/verify-otp', { state: { mobile: result.mobile } });
+      // User needs to verify email first
+      navigate('/verify-otp', { state: { email: result.email } });
     } else {
       setError(result.error);
     }

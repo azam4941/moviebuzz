@@ -43,9 +43,9 @@ export const AuthProvider = ({ children }) => {
   }, [token]);
 
   // Register function
-  const register = async (username, password, mobile) => {
+  const register = async (username, password, email) => {
     try {
-      const response = await axios.post('/api/auth/register', { username, password, mobile });
+      const response = await axios.post('/api/auth/register', { username, password, email });
       return { 
         success: true, 
         message: response.data.message,
@@ -61,9 +61,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Send OTP function
-  const sendOtp = async (mobile) => {
+  const sendOtp = async (email) => {
     try {
-      const response = await axios.post('/api/auth/send-otp', { mobile });
+      const response = await axios.post('/api/auth/send-otp', { email });
       return { 
         success: true, 
         message: response.data.message,
@@ -78,9 +78,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Verify OTP function
-  const verifyOtp = async (mobile, otp) => {
+  const verifyOtp = async (email, otp) => {
     try {
-      const response = await axios.post('/api/auth/verify-otp', { mobile, otp });
+      const response = await axios.post('/api/auth/verify-otp', { email, otp });
       const { token: newToken, user: userData } = response.data;
       
       localStorage.setItem('userToken', newToken);
@@ -113,7 +113,7 @@ export const AuthProvider = ({ children }) => {
         success: false, 
         error: errorData?.error || 'Login failed. Please try again.',
         needsVerification: errorData?.needsVerification,
-        mobile: errorData?.mobile
+        email: errorData?.email
       };
     }
   };
