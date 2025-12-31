@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import MovieCard from '../components/MovieCard';
 import SearchDownload from '../components/SearchDownload';
+import VideoGenerator from '../components/VideoGenerator';
 
 const Home = () => {
   const [movies, setMovies] = useState([]);
@@ -212,6 +213,13 @@ const Home = () => {
       <section className="relative z-10 py-12">
         <div className="container mx-auto px-4">
           <SearchDownload />
+        </div>
+      </section>
+
+      {/* Auto Video Generator */}
+      <section className="relative z-10 py-12">
+        <div className="container mx-auto px-4">
+          <VideoGenerator />
         </div>
       </section>
 
