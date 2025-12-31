@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import MovieCard from '../components/MovieCard';
+import SearchDownload from '../components/SearchDownload';
 
 const Home = () => {
   const [movies, setMovies] = useState([]);
@@ -204,6 +205,13 @@ const Home = () => {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Search & Download Public Domain Movies */}
+      <section className="relative z-10 py-12">
+        <div className="container mx-auto px-4">
+          <SearchDownload />
         </div>
       </section>
 
